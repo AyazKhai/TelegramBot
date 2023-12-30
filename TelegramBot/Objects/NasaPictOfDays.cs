@@ -1,74 +1,69 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TelegramBot.Models
-{
-    public class AstoData
-    {
-        public static string Title { get; set; }
-        public string Explanation { get; set; }
-        public string Url { get; set; }
 
-    }
+namespace TelegramBot.Models
+{  
     public class Nasa
     {
-        public string date = GetRandomDateString();
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Explanation { get; set; }
+        public string Url { get; set; }
+        public string Date { get; set; }
+
+        private readonly HttpClient _httpClient = new HttpClient();
+        private readonly string _apiKey = "TSLCHxDtNa5s4U9BW0iQA8G2ynOqiT9uT9VdvGjf";
+        
+
         public async Task<string> GetAstronomyPictureAsync()
         {
-
-            string apiKey = "TSLCHxDtNa5s4U9BW0iQA8G2ynOqiT9uT9VdvGjf";
             string apiUrl = "https://api.nasa.gov/planetary/apod";
-
-            string requestUrl = $"{apiUrl}?date={date}&api_key={apiKey}";
-
-            using (HttpClient client = new HttpClient())
+            
+            string requestUrl = $"{apiUrl}?date={GetRandomDateString()}&api_key={_apiKey}";
+            
+            try
             {
-                try
-                {
-                    HttpResponseMessage response = await client.GetAsync(requestUrl);
-                    response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await _httpClient.GetAsync(requestUrl);
+                response.EnsureSuccessStatusCode();
 
-                    var json = await response.Content.ReadAsStringAsync();
-                    var MessageData = JsonConvert.DeserializeObject<AstoData>(json);
-                    string url = MessageData.Url;
-                    return url;
-                }
-                catch (HttpRequestException ex)
-                {
-                    Console.WriteLine($"Ошибка при запросе к API: {ex.Message}");
-                    return null;
-                }
+                var json = await response.Content.ReadAsStringAsync();
+                var nasaData = JsonConvert.DeserializeObject<Nasa>(json);
+
+                UpdateProperties(nasaData);
+
+                return nasaData.Url;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error making API request: {ex.Message}");
+                return null;
             }
         }
-        public static string GetRandomDateString()
+
+        private void UpdateProperties(Nasa newData)
         {
-            Random random = new Random();
-
-            // Получаем случайный год между 1900 и 2100
-            int year = random.Next(2000, 2023);
-
-            // Получаем случайный месяц от 1 до 12
-            int month = random.Next(1, 13);
-
-            // Получаем максимальное количество дней в текущем месяце
-            int maxDaysInMonth = DateTime.DaysInMonth(year, month);
-
-            // Получаем случайный день от 1 до максимального количества дней в месяце
-            int day = random.Next(1, maxDaysInMonth + 1);
-
-            // Создаем и возвращаем строку с форматированной датой без времени
-            DateTime randomDate = new DateTime(year, month, day);
-            string formattedDate = randomDate.ToString("yyyy-MM-dd");
-            return formattedDate;
+            Title = newData.Title;
+            Explanation = newData.Explanation;
+            Url = newData.Url;
+            Date = newData.Date;
         }
 
+        private static string GetRandomDateString()
+        {
+            Random random = new Random();
+            int year = random.Next(2000, 2023);
+            int month = random.Next(1, 13);
+            int maxDaysInMonth = DateTime.DaysInMonth(year, month);
+            int day = random.Next(1, maxDaysInMonth + 1);
 
-
-
-
+            DateTime randomDate = new DateTime(year, month, day);
+            return randomDate.ToString("yyyy-MM-dd");
+        }
     }
 }
