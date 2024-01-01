@@ -19,6 +19,8 @@ public class Program
     {
         var botClient = new TelegramBotClient("6438897987:AAGaho7IoA3P3KDHoqgyBWVCV-nKuxo43gc");
         botClient.StartReceiving(Update, Error);
+
+       
         Console.ReadKey();
     }
 
@@ -40,41 +42,48 @@ public class Program
                 await botClient.SendTextMessageAsync(message.Chat.Id, $"<b>Приветствую вас!!!</b> ", parseMode: ParseMode.Html);
                 return;
             }
-            /*
+            
             if (message.Text.ToLower() == "/offensivemes")
             {
-                /*
-                InsultingData ins = new();
-                ins = await Insult.GetInsultingObjectAsync("ru");
-                using (ApplicationContext db = new ApplicationContext())
-                {
-                    // добавляем в бд
-                    db.Users.Add(ins);
-                    db.SaveChanges();
-                    Console.WriteLine("Объекты успешно сохранены");
 
-                    // получаем объекты из бд и выводим на консоль
-                    var users = db.Users.ToList();
-                    Console.WriteLine("Список объектов:");
-                    foreach (InsultingData u in users)
-                    {
-                        Console.WriteLine($"{u.number} \n {u.language} \n {u.insult} \n {u.created} \n {u.shown} \n {u.createdby} \n {u.active} \n {u.comment}");
-                    }
+                InsultingData ins = await Insult.GetInsultingObjectAsync("ru");
+
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
+
+                var options = optionsBuilder.UseSqlite("Data Source=insultdb.db").Options;
+
+                using (ApplicationContext db = new ApplicationContext(options))
+                {
+                    db.InsultDB.Add(ins);
+                    db.SaveChanges();
+                    Console.WriteLine($"сохранено{ins.Insult}\n");
                 }
+
                 
-                await botClient.SendTextMessageAsync(message.Chat.Id, $"{ins.insult}");
+
+                await Console.Out.WriteLineAsync(ins.Insult);
+                await botClient.SendTextMessageAsync(message.Chat.Id, $"{ins.Insult}");
                 return;
                 
-                string messa = await Insult.GetInsultMessageAsync("ru");
-                await botClient.SendTextMessageAsync(message.Chat.Id, $"{messa}");
-                return;
+               
             }
-            */
+            
             if (message.Text.ToLower().StartsWith("/nasapicture"))
             {
                 // Вызываем метод через экземпляр класса
                 Nasa obj = new Nasa();
                 string url = await obj.GetAstronomyPictureAsync();
+
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
+
+                var options = optionsBuilder.UseSqlite("Data Source=nasadb.db").Options;
+
+                using (ApplicationContext db = new ApplicationContext(options))
+                {
+                    db.NasaDB.Add(obj);
+                    db.SaveChanges();
+                    Console.WriteLine($"сохранено{obj.Title}\n");
+                }
 
                 await Console.Out.WriteLineAsync(obj.Title);
                 await Console.Out.WriteLineAsync(obj.Explanation);
@@ -139,43 +148,24 @@ public class Program
 
 }
 
-
 public class ApplicationContext : DbContext
 {
-    public DbSet<Nasa> NasaDB { get; set; } = null!;
-    public ApplicationContext()
-        : base()
+    public DbSet<User> Users { get; set; } = null!;
+    public ApplicationContext(DbContextOptions<ApplicationContext> options)
+            : base(options)
     {
         Database.EnsureCreated();
     }
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        var config = new ConfigurationBuilder()
-                        .AddJsonFile("json1.json")
-                        .SetBasePath(Directory.GetCurrentDirectory())
-                        .Build();
 
-        optionsBuilder.UseSqlite(config.GetConnectionString("DefaultConnection"));
-    }
+    public DbSet<Nasa> NasaDB { get; set; } = null!;
+    public DbSet<InsultingData> InsultDB { get; set; } = null;
+    public DbSet<Update> Updates { get; set; } = null!;
+    
 }
-public class ApplicationContext2 : DbContext
+
+public class User
 {
-    public DbSet<Nasa> NasaDB { get; set; } = null!;
-
-    public ApplicationContext2(DbContextOptions<ApplicationContext2> options) : base(options)
-    {
-        Database.EnsureCreated();
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Nasa>().HasNoKey();
-        var config = new ConfigurationBuilder()
-                        .AddJsonFile("json1.json")
-                        .SetBasePath(Directory.GetCurrentDirectory())
-                        .Build();
-
-
-        base.OnModelCreating(modelBuilder);
-    }
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    public int Age { get; set; }
 }

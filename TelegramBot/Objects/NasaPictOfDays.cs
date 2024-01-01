@@ -19,25 +19,27 @@ namespace TelegramBot.Models
 
         private readonly HttpClient _httpClient = new HttpClient();
         private readonly string _apiKey = "TSLCHxDtNa5s4U9BW0iQA8G2ynOqiT9uT9VdvGjf";
-        
+
 
         public async Task<string> GetAstronomyPictureAsync()
         {
             string apiUrl = "https://api.nasa.gov/planetary/apod";
-            
+
             string requestUrl = $"{apiUrl}?date={GetRandomDateString()}&api_key={_apiKey}";
-            
+
             try
             {
-                HttpResponseMessage response = await _httpClient.GetAsync(requestUrl);
-                response.EnsureSuccessStatusCode();
+                using (HttpResponseMessage response = await _httpClient.GetAsync(requestUrl))
+                {
+                    response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsStringAsync();
-                var nasaData = JsonConvert.DeserializeObject<Nasa>(json);
+                    var json = await response.Content.ReadAsStringAsync();
+                    var nasaData = JsonConvert.DeserializeObject<Nasa>(json);
 
-                UpdateProperties(nasaData);
+                    UpdateProperties(nasaData);
 
-                return nasaData.Url;
+                    return nasaData.Url;
+                }
             }
             catch (HttpRequestException ex)
             {

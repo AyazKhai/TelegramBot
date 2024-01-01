@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace TelegramBot.Models
 {
     public class InsultingData
     {
+         public int Id { get; set; }
         public string? Number { get; set; }
         public string? Language { get; set; }
         public string? Insult { get; set; }
