@@ -48,19 +48,6 @@ public class Program
 
                 InsultingData ins = await Insult.GetInsultingObjectAsync("ru");
 
-                var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
-
-                var options = optionsBuilder.UseSqlite("Data Source=insultdb.db").Options;
-
-                using (ApplicationContext db = new ApplicationContext(options))
-                {
-                    db.InsultDB.Add(ins);
-                    db.SaveChanges();
-                    Console.WriteLine($"сохранено{ins.Insult}\n");
-                }
-
-                
-
                 await Console.Out.WriteLineAsync(ins.Insult);
                 await botClient.SendTextMessageAsync(message.Chat.Id, $"{ins.Insult}");
                 return;
@@ -159,8 +146,6 @@ public class ApplicationContext : DbContext
 
     public DbSet<Nasa> NasaDB { get; set; } = null!;
     public DbSet<InsultingData> InsultDB { get; set; } = null;
-    public DbSet<Update> Updates { get; set; } = null!;
-    
 }
 
 public class User
