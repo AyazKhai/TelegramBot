@@ -19,7 +19,7 @@ public class Program
     {
         var botClient = new TelegramBotClient("6438897987:AAGaho7IoA3P3KDHoqgyBWVCV-nKuxo43gc");
         botClient.StartReceiving(Update, Error);
-
+        
        
         Console.ReadKey();
     }
@@ -43,17 +43,17 @@ public class Program
                 return;
             }
             
-            if (message.Text.ToLower() == "/offensivemes")
-            {
+            //if (message.Text.ToLower() == "/offensivemes")
+            //{
 
-                InsultingData ins = await Insult.GetInsultingObjectAsync("ru");
+            //    InsultingData ins = await Insult.GetInsultingObjectAsync("ru");
 
-                await Console.Out.WriteLineAsync(ins.Insult);
-                await botClient.SendTextMessageAsync(message.Chat.Id, $"{ins.Insult}");
-                return;
+            //    await Console.Out.WriteLineAsync(ins.Insult);
+            //    await botClient.SendTextMessageAsync(message.Chat.Id, $"{ins.Insult}");
+            //    return;
                 
                
-            }
+            //}
             
             if (message.Text.ToLower().StartsWith("/nasapicture"))
             {
@@ -84,10 +84,11 @@ public class Program
                 try
                 {
                     Message messa = await botClient.SendPhotoAsync(
-                    message.Chat.Id, InputFile.FromUri(url),
-                    caption: $"<b>Фото дня NASA \"{obj.Title}\"({Translator.TranslateText(obj.Title, "ru")}) в {obj.Date}</b>",
-                    parseMode: ParseMode.Html,
-                    cancellationToken: cancellationToken);
+                        message.Chat.Id, InputFile.FromUri(url),
+                        caption: $"<b>Фото дня NASA \"{obj.Title}\"({Translator.TranslateText(obj.Title, "ru")}) в {obj.Date}</b>",
+                        parseMode: ParseMode.Html,
+                        cancellationToken: cancellationToken);
+
                     await botClient.SendTextMessageAsync(message.Chat.Id, $"{Translator.TranslateText(obj.Explanation, "ru")} ", parseMode: ParseMode.Html);
                 }
                 catch (Exception ex)
@@ -137,7 +138,6 @@ public class Program
 
 public class ApplicationContext : DbContext
 {
-    public DbSet<User> Users { get; set; } = null!;
     public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
     {
@@ -145,12 +145,5 @@ public class ApplicationContext : DbContext
     }
 
     public DbSet<Nasa> NasaDB { get; set; } = null!;
-    public DbSet<InsultingData> InsultDB { get; set; } = null;
 }
 
-public class User
-{
-    public int Id { get; set; }
-    public string? Name { get; set; }
-    public int Age { get; set; }
-}
